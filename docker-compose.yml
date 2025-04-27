@@ -1,0 +1,58 @@
+version: '3.8' # Docker Compose file format version
+
+services:
+  # Database service
+  postgres:
+    image: postgres:13 
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD} # Database password (from .env)
+      POSTGRES_USER: ${DB_USERNAME}     # Database username (from .env)
+      POSTGRES_DB: ${DB_NAME}           # Database name (from .env)
+    ports:
+      - '5432:5432' # local-port:Docker-container-port
+    volumes:
+      - jiujitsu_postgres_data:/var/lib/postgresql/data # host-machine:container-location
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jiujitsu_network
+
+# Server service
+  server:
+    build:
+      context: ./server    # Path to the docker image
+      dockerfile: docker/Dockerfile
+    ports:
+      - '3000:3000' # local-port:Docker-container-port
+    environment:
+      - DB_HOST=${DB_HOST}          # Database host (from .env)
+      - DB_PORT=${DB_PORT}          # Database port (from .env)
+      - DB_USERNAME=${DB_USERNAME}  # Database username (from .env)
+      - DB_PASSWORD=${DB_PASSWORD}  # Database password (from .env)
+      - DB_NAME=${DB_NAME}          # Database name (from .env)
+    depends_on:
+      - postgres 
+    networks:
+      - jiujitsu_network
+
+# Client service
+  client:
+    build:
+      context: ./client     # Path to the docker image
+      dockerfile: docker/Dockerfile
+    ports:
+      - '3001:80' # local-port:Docker-container-port
+    depends_on:
+      - server 
+    networks:
+      - jiujitsu_network
+
+volumes:
+  jiujitsu_postgres_data: 
+
+networks:
+  jiujitsu_network:
+    driver: bridge
