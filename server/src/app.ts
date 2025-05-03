@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-
+import router from './routes/index.js';
 
 const app = express();
 
@@ -14,11 +14,8 @@ app.use(cors({
 // Middleware
 app.use(express.json());
 
-// Define routes
-app.get('/api', (req, res) => {
-    res.send('Hello World!');
-    console.log('GET request received');
-});
+// Load Routes
+app.use('/api', router);
 
 // Start the server
 app.listen(3000, () => {
