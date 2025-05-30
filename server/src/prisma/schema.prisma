@@ -1,0 +1,162 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id          String      @id @default(uuid())
+    email       String      @unique
+    password    String
+    name        String
+    role        Role        @default(MEMBER)
+    belt        Belt        @default(WHITE)
+    ageCategory AgeCategory @default(ADULT)
+    gymId       String
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    deletedAt   DateTime?
+
+    // Relationships
+    gym         Gym          @relation(fields: [gymId], references: [id])
+    attendances Attendance[]
+    BeltChange  BeltChange[]
+    Class       Class[]
+
+    //index
+    @@index([name])
+    @@index([role])
+    @@index([belt])
+    @@index([gymId])
+    @@index([ageCategory])
+    @@index([createdAt])
+    @@map("users")
+}
+
+model Class {
+    id                String    @id @default(uuid())
+    title             String
+    description       String?
+    startTime         DateTime
+    endTime           DateTime
+    maxCapacity       Int       @default(20)
+    currentAttendance Int       @default(0)
+    instructorId      String
+    gymId             String
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
+    deletedAt         DateTime?
+
+    // Relationships
+    attendances Attendance[]
+    instructor  User         @relation(fields: [instructorId], references: [id])
+    location    Gym          @relation(fields: [gymId], references: [id])
+
+    //index
+    @@index([startTime])
+    @@index([endTime])
+    @@index([instructorId])
+    @@index([gymId])
+    @@index([startTime, gymId])
+    @@index([currentAttendance])
+    @@index([createdAt])
+    @@map("classes")
+}
+
+model Attendance {
+    id          String   @id @default(uuid())
+    userId      String
+    classId     String
+    checkInTime DateTime @default(now())
+    status      String   @default("present")
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relationships
+    user  User  @relation(fields: [userId], references: [id])
+    class Class @relation(fields: [classId], references: [id])
+
+    //index
+    @@index([userId])
+    @@index([classId])
+    @@index([checkInTime])
+    @@index([userId, classId])
+    @@index([status])
+    @@map("attendances")
+}
+
+model BeltChange {
+    id        String   @id @default(uuid())
+    userId    String
+    oldBelt   Belt
+    newBelt   Belt
+    changedAt DateTime @default(now())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relationships
+    user User @relation(fields: [userId], references: [id])
+
+    //index
+    @@index([userId])
+    @@index([changedAt])
+    @@index([newBelt])
+    @@index([userId, changedAt])
+    @@map("belt_changes")
+}
+
+model Gym {
+    id        String    @id @default(uuid())
+    name      String
+    address   String
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    // Relationships
+    User  User[]
+    Class Class[]
+
+    //index
+    @@index([name])
+    @@map("gyms")
+}
+
+enum Role {
+    MEMBER
+    INSTRUCTOR
+    ADMIN
+}
+
+enum Belt {
+    WHITE
+    GREY
+    GREY_WHITE
+    GREY_BLACK
+    YELLOW
+    YELLOW_WHITE
+    YELLOW_BLACK
+    ORANGE
+    ORANGE_WHITE
+    ORANGE_BLACK
+    GREEN
+    GREEN_WHITE
+    GREEN_BLACK
+    BLUE
+    PURPLE
+    BROWN
+    BLACK
+}
+
+enum AgeCategory {
+    KID
+    TEEN
+    ADULT
+    MASTER1
+    MASTER2
+    MASTER3
+    MASTER4
+}
