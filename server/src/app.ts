@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import router from './routes/index.js';
+import prisma from './lib/prisma.js';
 
 const app = express();
 
@@ -10,6 +11,12 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Add graceful shutdown
+process.on('SIGTERM', async () => {
+    await prisma.$disconnect()
+    process.exit(0)
+})
 
 // Middleware
 app.use(express.json());
