@@ -13,10 +13,14 @@ app.use(cors({
 }));
 
 // Add graceful shutdown
-process.on('SIGTERM', async () => {
-    await prisma.$disconnect()
-    process.exit(0)
-})
+['SIGINT', 'SIGTERM'].forEach((signal) => { //SIGINT for production, SIGTERM for development
+    process.on(signal, async () => {
+        await prisma.$disconnect()
+        console.log('✅ Prisma client disconnected gracefully');
+        console.log('🚀 Server is shutting down gracefully');
+        process.exit(0)
+    });
+});
 
 // Middleware
 app.use(express.json());
