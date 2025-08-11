@@ -18,4 +18,28 @@ router.get('/', async (req, res) => {
 }
 );
 
+// Create a new user
+router.post('/', async (req, res) => {
+    const { name, email, password, role, belt, ageCategory, gymId } = req.body;
+    try {
+        const newUser = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password,
+                role,
+                belt,
+                ageCategory,
+                gymId
+            }
+        })
+        res.status(201).json(newUser);
+        console.log("User created:", newUser);
+    }
+    catch (error) {
+        console.error("Error creating user:", error);
+        res.status(500).json({ error: "Failed to create user" });
+    }
+})
+
 export default router;
