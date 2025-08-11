@@ -1,25 +1,19 @@
 import { Box } from "@mui/material";
-import apiClient from "../../api/apiClient";
 
-
-const apiTest = async () => {
-    try {
-        const response = await apiClient.get('/api/users')
-        console.log('API Response:', response.data);
-    }
-    catch (error) {
-        console.error('API Error:', error);
-    }
-}
-
-apiTest();
-
-// HomePage component
 export const HomePage = () => {
+
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <p>Welcome to the Home Page!</p>
-        </Box>
+        <div>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <h1>Welcome to the Home Page!</h1>
+            </Box>
+            <a href="/login">Login - </a>
+            <a href="/users">Users - </a>
+            <a href="/gyms">Gyms - </a>
+            <a href="/classes">Classes</a>
+        </div>
+
+
     )
 }
 
